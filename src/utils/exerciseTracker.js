@@ -61,6 +61,14 @@ export class ExerciseTracker {
       this.sessionMinAngle = angle;
     }
 
+    if (this.reps >= this.targetReps) {
+      this.phase = MOVEMENT_PHASE.REST;
+      this.hasCrossedPeak = false;
+      this.feedback = `Target reached (${this.targetReps}/${this.targetReps})! Session complete.`;
+      this.feedbackType = 'success';
+      return this.getSnapshot();
+    }
+
     // State Machine Transitions
     switch (this.phase) {
       case MOVEMENT_PHASE.REST:
@@ -116,7 +124,7 @@ export class ExerciseTracker {
 
         // Successfully returned to rest after reaching peak
         if (angle <= this.DOWN_THRESHOLD) {
-          if (this.hasCrossedPeak) {
+          if (this.hasCrossedPeak && this.reps < this.targetReps) {
             this.reps += 1;
             const repDuration = ((Date.now() - this.repStartTime) / 1000).toFixed(1);
             this.repHistory.push({
@@ -127,8 +135,13 @@ export class ExerciseTracker {
               durationSec: repDuration,
             });
 
-            this.feedback = `Rep ${this.reps} completed! (${this.currentRepPeak}° peak ROM)`;
-            this.feedbackType = 'success';
+            if (this.reps >= this.targetReps) {
+              this.feedback = `Target reached (${this.reps}/${this.targetReps})! Session complete.`;
+              this.feedbackType = 'success';
+            } else {
+              this.feedback = `Rep ${this.reps} completed! (${this.currentRepPeak}° peak ROM)`;
+              this.feedbackType = 'success';
+            }
           }
 
           this.phase = MOVEMENT_PHASE.REST;

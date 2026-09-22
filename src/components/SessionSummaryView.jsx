@@ -33,6 +33,16 @@ export function SessionSummaryView({ sessionData, onReturnHome, onRepeatExercise
       ? Math.round(repHistory.reduce((acc, curr) => acc + curr.peakAngle, 0) / repHistory.length)
       : peakAngle;
 
+  const hasReps = repHistory.length > 0;
+  const peakAngles = hasReps ? repHistory.map((r) => r.peakAngle) : [];
+  const maxPeak = hasReps ? Math.max(...peakAngles) : 0;
+  const minPeak = hasReps ? Math.min(...peakAngles) : 0;
+  const peakAngleRange = hasReps ? maxPeak - minPeak : 0;
+  const repCountLabel = repHistory.length === 1 ? '1 repetition' : `${repHistory.length} repetitions`;
+  const peakRangeSubtitle = hasReps
+    ? `${minPeak}°–${maxPeak}° across ${repCountLabel}`
+    : 'No repetitions recorded';
+
   return (
     <div className="summary-container">
       {/* Celebration Header */}
@@ -76,6 +86,15 @@ export function SessionSummaryView({ sessionData, onReturnHome, onRepeatExercise
           icon={TrendingUp}
           variant="primary"
           subtitle="Mean height across all repetitions"
+        />
+
+        <MetricCard
+          title="Peak Angle Range"
+          value={hasReps ? `${peakAngleRange}°` : '—'}
+          unit=""
+          icon={Activity}
+          variant="default"
+          subtitle={peakRangeSubtitle}
         />
 
         <MetricCard
